@@ -21,7 +21,7 @@ Mockup Studio Preview
 از آنجایی که این ابزار یک فایل HTML خالص است، نیازی به بیلد کردن یا نصب وابستگی‌ها ندارد!
 
 کلون کردن ریپازیتوری:
-git clone https://github.com/mockup-studio/mockup-studio.git
+git clone https://github.com/dimanetwork/mockup-studio.git
 ورود به پوشه پروژه:
 bash
 

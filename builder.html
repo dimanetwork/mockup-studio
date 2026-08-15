@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استودیو موکاپ | نسخه Tailwind</title>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [{
+    "@type": "Question",
+    "name": "چگونه می‌توانم موکاپ وب‌سایت خود را با Tailwind CSS بسازم؟",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "با استفاده از ابزار استودیو موکاپ، کافیست صنعت خود را انتخاب کنید، بخش‌های مورد نیاز (هیرو، سرویس‌ها و...) را تیک بزنید تا ابزار به صورت خودکار موکاپ را با کدهای خالص Tailwind CSS برای شما تولید کند. سپس می‌توانید فایل HTML را دانلود کنید."
+    }
+  }]
+}
+</script>
+<script>
+  // کانفیگ Tailwind برای استفاده از متغیرهای CSS داینامیک
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          primary: 'rgb(var(--c-primary) / <alpha-value>)',
+          secondary: 'rgb(var(--c-secondary) / <alpha-value>)',
+          accent: 'rgb(var(--c-accent) / <alpha-value>)',
+          mainbg: 'rgb(var(--c-bg) / <alpha-value>)',
+          foreground: 'rgb(var(--c-fg) / <alpha-value>)',
+          muted: 'rgb(var(--c-muted) / <alpha-value>)',
+          cardbg: 'rgb(var(--c-cardBg) / <alpha-value>)',
+        },
+        fontFamily: {
+          sans: ['Vazirmatn', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+  /* استایل‌های مربوط به رابط کاربری خود ابزار (پنل تنظیمات) */
+  body { font-family: 'Vazirmatn', sans-serif; background: #0a0908; color: #f5f1eb; }
+  .custom-scroll::-webkit-scrollbar { width: 6px; }
+  .custom-scroll::-webkit-scrollbar-thumb { background: rgba(245,241,235,0.15); border-radius: 3px; }
+  .mockup-wrapper { background: radial-gradient(circle at 50% 0%, rgba(255, 107, 91, 0.06), transparent 50%); }
+  @keyframes mFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .mockup-content > div { animation: mFadeIn 0.5s ease-out backwards; }
+  .mockup-content > div:nth-child(1) { animation-delay: 0.05s; }
+  .mockup-content > div:nth-child(2) { animation-delay: 0.1s; }
+  .mockup-content > div:nth-child(3) { animation-delay: 0.15s; }
+</style>
+</head>
+<body class="h-screen overflow-hidden">
+
+<div class="flex h-screen relative z-10">
+  
+  <!-- سایدبار -->
+  <aside class="w-[340px] bg-[#161413]/85 backdrop-blur-xl border-l border-white/5 overflow-y-auto p-6 flex flex-col gap-6 custom-scroll flex-shrink-0">
+    <div class="flex items-center gap-3 pb-4 border-b border-white/5">
+      <div class="w-10 h-10 bg-gradient-to-br from-[#ff6b5b] to-[#f4b860] rounded-xl flex items-center justify-center font-extrabold text-xl text-[#0a0908] shadow-lg shadow-[#ff6b5b]/30">M</div>
+      <div>
+        <h1 class="text-base font-bold">استودیو موکاپ</h1>
+        <p class="text-[11px] text-stone-400 mt-0.5">پیشنهاد دهنده هوشمند Tailwind</p>
+      </div>
+    </div>
+
+    <div>
+      <h2 class="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-3 flex items-center gap-2"><span class="w-1 h-1 bg-[#ff6b5b] rounded-full"></span>نوع کسب و کار</h2>
+      <div class="grid grid-cols-2 gap-2" id="industryGrid"></div>
+    </div>
+
+    <div class="flex-1 flex flex-col min-h-0">
+      <h2 class="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-3 flex items-center gap-2"><span class="w-1 h-1 bg-[#ff6b5b] rounded-full"></span>بخش‌های مورد نیاز</h2>
+      <div class="flex flex-col gap-1.5 overflow-y-auto pr-1 custom-scroll" id="sectionList"></div>
+    </div>
+
+    <button class="bg-gradient-to-br from-[#ff6b5b] to-[#ff8c5b] text-[#0a0908] py-3 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2.5 shadow-lg shadow-[#ff6b5b]/25 hover:-translate-y-0.5 transition-transform disabled:opacity-40 disabled:cursor-not-allowed" id="generateBtn" disabled>
+      ساخت موکاپ
+    </button>
+  </aside>
+
+  <!-- بخش اصلی -->
+  <main class="flex-1 flex flex-col overflow-hidden">
+    <div class="bg-[#161413]/70 backdrop-blur-xl border-b border-white/5 p-3.5 flex items-center justify-between gap-4 flex-wrap">
+      <div class="flex items-center gap-3">
+        <div class="text-sm font-semibold" id="toolbarTitle">پیش‌نمایش موکاپ</div>
+        <div class="text-xs text-stone-400 flex items-center gap-1.5" id="toolbarMeta">
+          <span class="w-1.5 h-1.5 bg-[#7ee0a7] rounded-full animate-pulse"></span>
+          <span>آماده</span>
+        </div>
+      </div>
+      <div class="flex gap-2 items-center">
+        <div class="flex bg-[#1f1c1a] rounded-lg p-1 border border-white/5">
+          <button class="device-btn active px-3 py-1.5 rounded-md text-xs font-semibold transition-colors" data-device="desktop">دسکتاپ</button>
+          <button class="device-btn px-3 py-1.5 rounded-md text-xs font-semibold transition-colors" data-device="mobile">موبایل</button>
+        </div>
+        <button class="tool-btn bg-[#1f1c1a] border border-white/5 px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 hover:bg-[#26221f] disabled:opacity-35" id="regenerateBtn" disabled>طرح جدید</button>
+        <button class="tool-btn bg-[#1f1c1a] border border-white/5 px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 hover:bg-[#26221f] disabled:opacity-35" id="downloadHtmlBtn" disabled>HTML</button>
+        <button class="bg-gradient-to-br from-[#7ee0a7] to-[#5bc88a] text-[#0a0908] px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 hover:-translate-y-0.5 transition-transform disabled:opacity-35" id="downloadBtn" disabled>دانلود تصویر</button>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-auto p-7 flex justify-center items-start mockup-wrapper custom-scroll" id="viewport">
+      <div class="w-full bg-white rounded-xl overflow-hidden shadow-2xl relative transition-all duration-300" id="browserFrame" style="max-width: 1200px;">
+        <div class="bg-[#f0ede8] p-3 flex items-center gap-3 border-b border-[#e0dcd5]">
+          <div class="flex gap-1.5">
+            <div class="w-3 h-3 rounded-full bg-[#ff5f57]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#febc2e]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#28c840]"></div>
+          </div>
+          <div class="flex-1 bg-white px-3.5 py-1.5 rounded-md text-xs text-gray-500 font-mono text-left border border-[#e5e1da]" id="browserUrl">https://your-site.com</div>
+        </div>
+        <div class="bg-white min-h-[600px] mockup-content" id="mockupContent">
+          <div class="flex flex-col items-center justify-center p-20 text-center gap-5 text-stone-400 min-h-[600px]">
+            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#ff6b5b]/10 to-[#7ee0a7]/10 border border-white/5 flex items-center justify-center text-[#ff6b5b]">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <h3 class="text-lg text-stone-800 font-semibold">موکاپ شما اینجا نمایش داده می‌شود</h3>
+            <p class="text-sm max-w-md leading-7 text-stone-500">از پنل کناری، نوع کسب و کار را انتخاب کنید، بخش‌های مورد نیاز خود را مشخص کرده و روی «ساخت موکاپ» بزنید.</p>
+          </div>
+        </div>
+        <div class="absolute inset-0 bg-white/85 backdrop-blur-sm hidden items-center justify-center z-50 rounded-xl" id="loadingOverlay">
+          <div class="w-10 h-10 border-[3px] border-stone-200 border-t-[#ff6b5b] rounded-full animate-spin"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 translate-y-32 bg-[#1f1c1a] border border-white/10 px-4 py-3 rounded-xl text-sm z-50 opacity-0 transition-all flex items-center gap-2 shadow-2xl" id="toast"></div>
+
+<script>
+// =============== DATA ===============
+const INDUSTRIES = [
+  { id: 'corporate', name: 'شرکتی', icon: 'M3 21h18M5 21V7l8-4v18M19 21V11l-6-4' },
+  { id: 'tech', name: 'فناوری', icon: 'M13 2L3 14h9l-1 8 10-12h-9l1-8z' },
+  { id: 'ecommerce', name: 'فروشگاهی', icon: 'M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18' },
+  { id: 'restaurant', name: 'رستوران', icon: 'M3 2v7c0 1.1.9 2 2 2h0a2 2 0 0 0 2-2V2 M7 2v20 M21 15V2a5 5 0 0 0-3 4.5V13c0 1.1.9 2 2 2h1z' },
+  { id: 'agency', name: 'آژانس', icon: 'M12 2l2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z' },
+  { id: 'portfolio', name: 'نمونه‌کار', icon: 'M12 19l7-7 3 3-7 7-3-3z M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z' }
+];
+
+const SECTIONS_DEF = [
+  { id: 'nav', name: 'منوی اصلی', variants: 2 },
+  { id: 'hero', name: 'معرفی اصلی (Hero)', variants: 3 },
+  { id: 'features', name: 'ویژگی‌ها', variants: 2 },
+  { id: 'about', name: 'درباره ما', variants: 2 },
+  { id: 'services', name: 'خدمات', variants: 2 },
+  { id: 'stats', name: 'آمار و دستاوردها', variants: 2 },
+  { id: 'contact', name: 'تماس با ما', variants: 2 },
+  { id: 'footer', name: 'فوتر', variants: 2 }
+];
+
+// پالت‌های رنگی در فرمت RGB برای سازگاری با Tailwind
+const PALETTES = {
+  corporate: { primary: '26 58 92', secondary: '201 169 97', accent: '232 176 75', bg: '248 246 241', fg: '26 26 26', muted: '107 114 128', cardBg: '255 255 255' },
+  tech: { primary: '10 14 26', secondary: '0 217 163', accent: '126 224 167', bg: '15 20 25', fg: '232 240 245', muted: '139 149 165', cardBg: '26 34 48' },
+  ecommerce: { primary: '185 28 28', secondary: '251 191 36', accent: '248 113 113', bg: '255 251 235', fg: '26 26 26', muted: '107 114 128', cardBg: '255 255 255' },
+  restaurant: { primary: '124 45 18', secondary: '251 191 36', accent: '220 38 38', bg: '255 247 237', fg: '26 26 26', muted: '120 113 108', cardBg: '255 255 255' },
+  agency: { primary: '76 29 149', secondary: '236 72 153', accent: '244 114 182', bg: '253 244 255', fg: '26 26 26', muted: '107 114 128', cardBg: '255 255 255' },
+  portfolio: { primary: '10 10 10', secondary: '251 191 36', accent: '249 115 22', bg: '255 255 255', fg: '10 10 10', muted: '107 114 128', cardBg: '249 249 249' }
+};
+
+const CONTENT = {
+  corporate: {
+    name: 'آریاگستر', tagline: 'شرکت توسعه کسب و کار', url: 'aria-gostar.ir',
+    hero: { title: 'راهکارهای هوشمند برای رشد سازمان شما', sub: 'با تکیه بر تجربه ۱۵ ساله و تیمی از متخصصان، کسب و کار شما را برای آینده آماده می‌کنیم.' },
+    about: 'ما در آریاگستر با رویکردی داده‌محور و خلاقانه، کسب و کارها را در مسیر رشد پایدار همراهی می‌کنیم. تیم ما از مشاوران، تحلیل‌گران و استراتژیست‌های باتجربه تشکیل شده است.',
+    services: [
+      { title: 'مشاوره استراتژیک', desc: 'تحلیل دقیق بازار و تدوین استراتژی رشد متناسب با اهداف شما' },
+      { title: 'تحول دیجیتال', desc: 'سازمان‌سازی و آماده‌سازی برای اقتصاد دیجیتال' },
+      { title: 'مدیریت پروژه', desc: 'رهبری پروژه‌ها از ایده تا اجرا با روش‌های چابک' },
+      { title: 'توسعه منابع انسانی', desc: 'استخدام، آموزش و نگهداشت نخبگان سازمانی' }
+    ],
+    stats: [{ num: '۲۵۰+', label: 'پروژه موفق' }, { num: '۹۸٪', label: 'رضایت مشتری' }, { num: '۱۵', label: 'سال تجربه' }, { num: '۸۰+', label: 'کارشناس مجرب' }],
+    contact: { phone: '۰۲۱-۸۸۱۲۳۴۵۶', email: 'info@aria-gostar.ir', address: 'تهران، خیابان ولیعصر، برج آریا' }
+  },
+  tech: {
+    name: 'پیکسل‌لایو', tagline: 'استارتاپ فناوری', url: 'pixellive.io',
+    hero: { title: 'ساختن آینده با کد', sub: 'ما محصولاتی می‌سازیم که زندگی را ساده‌تر می‌کنند. از ایده تا اجرا، کنار شما هستیم.' },
+    about: 'تیمی از مهندسان، طراحان و محصول‌ساز‌ها که برای ساختن آینده تلاش می‌کنند. باور داریم فناوری باید در خدمت انسان باشد، نه برعکس.',
+    services: [
+      { title: 'توسعه وب‌اپ', desc: 'ساخت اپلیکیشن‌های مقیاس‌پذیر با تکنولوژی‌های مدرن' },
+      { title: 'موبایل اپ', desc: 'iOS و Android با یک کدبیس واحد' },
+      { title: 'هوش مصنوعی', desc: 'ادغام مدل‌های زبانی در محصول شما' },
+      { title: 'ابر و زیرساخت', desc: 'راهکارهای AWS، GCP و Azure' }
+    ],
+    stats: [{ num: '۵۰+', label: 'محصول منتشر شده' }, { num: '۴M+', label: 'کاربر فعال' }, { num: '۹۹.۹٪', label: 'آپ‌تایم' }, { num: '۳۰+', label: 'متخصص' }],
+    contact: { phone: '۰۲۱-۹۱۰۱۲۳۴۵', email: 'hello@pixellive.io', address: 'تهران، پارک علم و فناوری' }
+  }
+};
+
+// اگر صنعت انتخاب شده در CONTENT نبود، از محتوای شرکتی استفاده می‌کند اما رنگ‌ها تغییر می‌کند
+function getContent(industry) {
+  return CONTENT[industry] || { ...CONTENT.corporate, name: INDUSTRIES.find(i=>i.id===industry)?.name || 'برند نمونه', tagline: 'برند حرفه‌ای', url: industry + '.ir' };
+}
+
+const state = { industry: null, sections: new Set(), currentVariants: {}, device: 'desktop' };
+
+function pickVariant(id, forceNew) {
+  const def = SECTIONS_DEF.find(s => s.id === id);
+  if (forceNew || state.currentVariants[id] === undefined) {
+    let newV;
+    do { newV = Math.floor(Math.random() * def.variants); } while (forceNew && newV === state.currentVariants[id] && def.variants > 1);
+    state.currentVariants[id] = newV;
+  }
+  return state.currentVariants[id];
+}
+
+// =============== RENDER UI ===============
+function renderSidebar() {
+  document.getElementById('industryGrid').innerHTML = INDUSTRIES.map(ind => `
+    <div class="industry-card p-2.5 rounded-lg border ${state.industry === ind.id ? 'border-[#ff6b5b] bg-[#ff6b5b]/10' : 'border-white/5 bg-[#1f1c1a]'} cursor-pointer flex items-center gap-2 transition-all hover:border-white/15" data-id="${ind.id}">
+      <svg class="w-4 h-4 ${state.industry === ind.id ? 'text-[#ff6b5b]' : 'text-stone-400'}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${ind.icon}"/></svg>
+      <span class="text-xs font-semibold">${ind.name}</span>
+    </div>
+  `).join('');
+  
+  document.getElementById('sectionList').innerHTML = SECTIONS_DEF.map(s => `
+    <div class="section-item flex items-center gap-2.5 p-2 rounded-lg border ${state.sections.has(s.id) ? 'border-[#7ee0a7]/30 bg-[#7ee0a7]/5' : 'border-white/5 bg-[#1f1c1a]'} cursor-pointer transition-all hover:bg-[#26221f]" data-id="${s.id}">
+      <div class="w-4 h-4 rounded border ${state.sections.has(s.id) ? 'bg-[#7ee0a7] border-[#7ee0a7]' : 'border-white/15'} flex items-center justify-center">
+        ${state.sections.has(s.id) ? '<svg class="w-2.5 h-2.5 text-[#0a0908]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
+      </div>
+      <span class="text-xs font-medium flex-1">${s.name}</span>
+      <span class="text-[9px] px-1.5 py-0.5 rounded bg-[#0a0908] text-stone-500 font-bold">${s.variants}</span>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.industry-card').forEach(c => c.onclick = () => { state.industry = c.dataset.id; renderSidebar(); updateBtn(); });
+  document.querySelectorAll('.section-item').forEach(c => c.onclick = () => {
+    if (state.sections.has(c.dataset.id)) state.sections.delete(c.dataset.id); else state.sections.add(c.dataset.id);
+    renderSidebar(); updateBtn();
+  });
+}
+
+function updateBtn() { document.getElementById('generateBtn').disabled = !state.industry || state.sections.size === 0; }
+
+// =============== TAILWIND MOCKUP GENERATORS ===============
+const ICONS = {
+  check: '<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  arrow: '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+  phone: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  mail: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+  location: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'
+};
+
+function renderNav(c, v) {
+  const links = ['خانه', 'درباره ما', 'خدمات', 'نمونه‌کارها', 'تماس'];
+  if (v === 0) {
+    return `<div class="px-[5%] py-4 bg-cardbg border-b border-foreground/10 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-9 h-9 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center text-white font-extrabold text-lg">${c.name[0]}</div>
+        <span class="font-bold text-base text-foreground">${c.name}</span>
+      </div>
+      <div class="hidden md:flex gap-6">
+        ${links.map((l,i) => `<a class="text-xs ${i===0?'text-accent font-semibold':'text-muted font-medium'}">${l}</a>`).join('')}
+      </div>
+      <button class="bg-primary text-white px-4 py-2 rounded-lg text-xs font-semibold">شروع همکاری</button>
+    </div>`;
+  }
+  return `<div class="px-[5%] py-4 bg-primary text-white flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-8 h-8 bg-accent rounded-lg flex items-center justify-center text-primary font-extrabold text-base">${c.name[0]}</div>
+      <span class="font-bold text-sm">${c.name}</span>
+    </div>
+    <div class="hidden md:flex gap-7">
+      ${links.map((l,i) => `<a class="text-xs ${i===0?'border-b-2 border-accent pb-1 text-white':'text-white/80'}">${l}</a>`).join('')}
+    </div>
+    <button class="bg-accent text-primary px-4 py-2 rounded-lg text-xs font-bold">درخواست دمو</button>
+  </div>`;
+}
+
+function renderHero(c, v) {
+  if (v === 0) {
+    return `<div class="py-20 px-[5%] bg-mainbg text-center">
+      <div class="max-w-[1200px] mx-auto">
+        <span class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold mb-3.5 bg-accent/15 text-primary">${c.tagline}</span>
+        <h1 class="text-4xl font-extrabold leading-tight tracking-tight mb-4 text-foreground max-w-[800px] mx-auto">${c.hero.title}</h1>
+        <p class="text-base leading-7 mb-7 text-muted max-w-[650px] mx-auto">${c.hero.sub}</p>
+        <div class="flex gap-3 justify-center flex-wrap">
+          <button class="bg-primary text-white px-6 py-3 rounded-lg text-sm font-semibold flex items-center gap-2">شروع کنید ${ICONS.arrow}</button>
+          <button class="border-[1.5px] border-foreground/20 text-foreground px-6 py-3 rounded-lg text-sm font-semibold">مشاهده دمو</button>
+        </div>
+      </div>
+    </div>`;
+  } else if (v === 1) {
+    return `<div class="py-20 px-[5%] bg-mainbg">
+      <div class="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-16 items-center">
+        <div>
+          <span class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold mb-3.5 bg-accent/15 text-primary">${c.tagline}</span>
+          <h1 class="text-4xl font-extrabold leading-tight mb-4 text-foreground">${c.hero.title}</h1>
+          <p class="text-base leading-7 mb-6 text-muted">${c.hero.sub}</p>
+          <div class="flex gap-3">
+            <button class="bg-primary text-white px-6 py-3 rounded-lg text-sm font-semibold flex items-center gap-2">شروع کنید ${ICONS.arrow}</button>
+            <button class="border-[1.5px] border-foreground/20 text-foreground px-6 py-3 rounded-lg text-sm font-semibold">بیشتر</button>
+          </div>
+        </div>
+        <div class="aspect-[1.1] bg-gradient-to-br from-primary to-secondary rounded-3xl shadow-xl p-5">
+          <div class="bg-white/10 h-full rounded-2xl p-6 text-white backdrop-blur-sm flex flex-col justify-center gap-4">
+            <div class="text-sm opacity-80">پنل کاربری</div>
+            <div class="text-4xl font-extrabold">${c.stats[0].num}</div>
+            <div class="space-y-2">
+              <div class="h-2 bg-white/20 rounded overflow-hidden"><div class="w-3/4 h-full bg-accent"></div></div>
+              <div class="h-2 bg-white/20 rounded overflow-hidden"><div class="w-1/2 h-full bg-accent"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+  return `<div class="py-24 px-[5%] bg-gradient-to-br from-primary to-secondary text-white relative overflow-hidden">
+    <div class="absolute -top-20 -left-20 w-96 h-96 bg-accent/20 rounded-full blur-3xl"></div>
+    <div class="max-w-[1200px] mx-auto relative text-center">
+      <span class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold mb-4 bg-white/15">${c.tagline}</span>
+      <h1 class="text-5xl font-extrabold leading-tight max-w-[850px] mx-auto mb-5">${c.hero.title}</h1>
+      <p class="text-lg leading-7 max-w-[600px] mx-auto mb-8 opacity-90">${c.hero.sub}</p>
+      <button class="bg-white text-primary px-8 py-3.5 rounded-lg text-sm font-bold">شروع کنید</button>
+    </div>
+  </div>`;
+}
+
+function renderFeatures(c, v) {
+  if (v === 0) {
+    return `<div class="py-16 px-[5%] bg-mainbg">
+      <div class="max-w-[1200px] mx-auto">
+        <div class="text-center mb-12">
+          <span class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold mb-3 bg-accent/15 text-primary">ویژگی‌ها</span>
+          <h2 class="text-3xl font-bold text-foreground">چرا ما را انتخاب کنید؟</h2>
+        </div>
+        <div class="grid md:grid-cols-4 gap-5">
+          ${c.services.map((f, i) => `
+            <div class="bg-cardbg border border-foreground/5 rounded-xl p-6 text-center">
+              <div class="w-12 h-12 bg-accent/15 text-primary rounded-xl flex items-center justify-center mx-auto mb-4 font-bold">${i+1}</div>
+              <h3 class="text-base font-bold text-foreground mb-2">${f.title}</h3>
+              <p class="text-xs leading-6 text-muted">${f.desc}</p>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+  return `<div class="py-16 px-[5%] bg-cardbg">
+    <div class="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-5">
+      ${c.services.map((f, i) => `
+        <div class="flex gap-5 items-start bg-mainbg rounded-xl p-6 border border-foreground/5">
+          <div class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white font-bold flex-shrink-0">${i+1}</div>
+          <div>
+            <h3 class="text-base font-bold text-foreground mb-1.5">${f.title}</h3>
+            <p class="text-xs leading-7 text-muted">${f.desc}</p>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function renderAbout(c, v) {
+  if (v === 0) {
+    return `<div class="py-16 px-[5%] bg-mainbg">
+      <div class="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <span class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold mb-3 bg-accent/15 text-primary">درباره ما</span>
+          <h2 class="text-3xl font-bold text-foreground mb-4">داستان ${c.name}</h2>
+          <p class="text-sm leading-8 text-muted mb-6">${c.about}</p>
+          <button class="bg-primary text-white px-6 py-3 rounded-lg text-sm font-semibold">بیشتر بدانید</button>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          ${c.stats.slice(0,4).map(s => `<div class="bg-cardbg p-6 rounded-xl text-center border border-foreground/5"><div class="text-2xl font-extrabold text-primary mb-1">${s.num}</div><div class="text-xs text-muted">${s.label}</div></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+  return `<div class="py-20 px-[5%] bg-primary text-white text-center">
+    <div class="max-w-[850px] mx-auto">
+      <span class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold mb-4 bg-white/15">درباره ما</span>
+      <p class="text-2xl font-bold leading-9 mb-8">«${c.about.slice(0, 150)}...»</p>
+      <div class="flex justify-center gap-12 pt-8 border-t border-white/10">
+        ${c.stats.slice(0,3).map(s => `<div><div class="text-3xl font-extrabold text-accent mb-1">${s.num}</div><div class="text-xs opacity-80">${s.label}</div></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderServices(c, v) {
+  if (v === 0) {
+    return `<div class="py-16 px-[5%] bg-mainbg">
+      <div class="max-w-[1200px] mx-auto">
+        <div class="text-center mb-12">
+          <span class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold mb-3 bg-accent/15 text-primary">خدمات</span>
+          <h2 class="text-3xl font-bold text-foreground">خدمات تخصصی ما</h2>
+        </div>
+        <div class="grid md:grid-cols-2 gap-5">
+          ${c.services.map(s => `
+            <div class="bg-cardbg border border-foreground/5 rounded-xl p-6 flex gap-5">
+              <div class="w-14 h-14 bg-gradient-to-br from-primary to-secondary rounded-xl flex items-center justify-center text-white text-2xl font-extrabold flex-shrink-0">+</div>
+              <div>
+                <h3 class="text-base font-bold text-foreground mb-2">${s.title}</h3>
+                <p class="text-xs leading-7 text-muted mb-3">${s.desc}</p>
+                <a class="text-xs text-primary font-semibold flex items-center gap-1">اطلاعات بیشتر ${ICONS.arrow}</a>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+  }
+  return `<div class="py-16 px-[5%] bg-cardbg">
+    <div class="max-w-[1200px] mx-auto">
+      <div class="grid md:grid-cols-2 gap-12 items-start mb-8">
+        <div>
+          <span class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold mb-3 bg-accent/15 text-primary">خدمات</span>
+          <h2 class="text-3xl font-bold text-foreground">راهکارهای جامع برای شما</h2>
+          <p class="text-sm text-muted mt-3">ما با ارائه خدمات متنوع، تمام نیازهای شما را پوشش می‌دهیم.</p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-3">
+        ${c.services.map((s, i) => `
+          <div class="flex gap-6 items-center p-5 bg-mainbg rounded-xl border border-foreground/5">
+            <div class="text-4xl font-extrabold text-primary/20 w-12">0${i+1}</div>
+            <div class="flex-1"><h3 class="text-base font-bold text-foreground mb-1">${s.title}</h3><p class="text-xs text-muted leading-7">${s.desc}</p></div>
+            <div class="text-primary">${ICONS.arrow}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderStats(c, v) {
+  if (v === 0) {
+    return `<div class="py-12 px-[5%] bg-primary text-white">
+      <div class="max-w-[1200px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        ${c.stats.map(s => `<div><div class="text-4xl font-extrabold text-accent mb-1.5">${s.num}</div><div class="text-xs opacity-85">${s.label}</div></div>`).join('')}
+      </div>
+    </div>`;
+  }
+  return `<div class="py-14 px-[5%] bg-mainbg">
+    <div class="max-w-[1200px] mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+      ${c.stats.map(s => `
+        <div class="p-7 bg-cardbg rounded-xl text-center border-t-4 border-accent shadow-sm">
+          <div class="text-3xl font-extrabold text-primary mb-1">${s.num}</div>
+          <div class="text-xs text-muted">${s.label}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+
+function renderContact(c, v) {
+  if (v === 0) {
+    return `<div class="py-16 px-[5%] bg-mainbg">
+      <div class="max-w-[1200px] mx-auto grid md:grid-cols-2 gap-12">
+        <div>
+          <span class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-semibold mb-3 bg-accent/15 text-primary">تماس</span>
+          <h2 class="text-3xl font-bold text-foreground mb-4">با ما در ارتباط باشید</h2>
+          <div class="flex flex-col gap-4">
+            <div class="flex gap-4 items-center p-4 bg-cardbg rounded-xl border border-foreground/5"><div class="w-11 h-11 bg-primary/10 rounded-xl flex items-center justify-center text-primary">${ICONS.phone}</div><div><div class="text-[11px] text-muted mb-1">تلفن</div><div class="text-sm font-bold text-foreground" dir="ltr">${c.contact.phone}</div></div></div>
+            <div class="flex gap-4 items-center p-4 bg-cardbg rounded-xl border border-foreground/5"><div class="w-11 h-11 bg-primary/10 rounded-xl flex items-center justify-center text-primary">${ICONS.mail}</div><div><div class="text-[11px] text-muted mb-1">ایمیل</div><div class="text-sm font-bold text-foreground" dir="ltr">${c.contact.email}</div></div></div>
+          </div>
+        </div>
+        <div class="bg-cardbg p-8 rounded-2xl border border-foreground/5 flex flex-col gap-3">
+          <input class="p-3 bg-mainbg border border-foreground/10 rounded-lg text-sm text-foreground" placeholder="نام شما">
+          <input class="p-3 bg-mainbg border border-foreground/10 rounded-lg text-sm text-foreground" placeholder="ایمیل شما">
+          <textarea class="p-3 bg-mainbg border border-foreground/10 rounded-lg text-sm text-foreground min-h-[100px]" placeholder="پیام"></textarea>
+          <button class="bg-primary text-white p-3 rounded-lg text-sm font-semibold mt-2">ارسال پیام</button>
+        </div>
+      </div>
+    </div>`;
+  }
+  return `<div class="py-16 px-[5%] bg-primary text-white text-center">
+    <div class="max-w-[700px] mx-auto">
+      <h2 class="text-3xl font-bold mb-4">بیایید با هم صحبت کنیم</h2>
+      <p class="text-sm opacity-85 mb-10">منتظر شنیدن صدای شما هستیم</p>
+      <div class="grid md:grid-cols-3 gap-4 mb-8">
+        <div class="p-6 bg-white/10 rounded-xl backdrop-blur-sm"><div class="w-11 h-11 bg-accent rounded-xl flex items-center justify-center text-primary mx-auto mb-3">${ICONS.phone}</div><div class="text-[11px] opacity-70 mb-1">تلفن</div><div class="text-sm font-bold" dir="ltr">${c.contact.phone}</div></div>
+        <div class="p-6 bg-white/10 rounded-xl backdrop-blur-sm"><div class="w-11 h-11 bg-accent rounded-xl flex items-center justify-center text-primary mx-auto mb-3">${ICONS.mail}</div><div class="text-[11px] opacity-70 mb-1">ایمیل</div><div class="text-sm font-bold" dir="ltr">${c.contact.email}</div></div>
+        <div class="p-6 bg-white/10 rounded-xl backdrop-blur-sm"><div class="w-11 h-11 bg-accent rounded-xl flex items-center justify-center text-primary mx-auto mb-3">${ICONS.location}</div><div class="text-[11px] opacity-70 mb-1">آدرس</div><div class="text-sm font-bold">تهران، ایران</div></div>
+      </div>
+      <button class="bg-accent text-primary px-7 py-3 rounded-lg text-sm font-bold">ارسال پیام</button>
+    </div>
+  </div>`;
+}
+
+function renderFooter(c, v) {
+  const cols = [
+    { title: 'دسترسی سریع', links: ['خانه', 'درباره ما', 'خدمات', 'بلاگ'] },
+    { title: 'خدمات', links: ['طراحی وب', 'برندینگ', 'دیجیتال مارکتینگ'] },
+    { title: 'حقوقی', links: ['قوانین', 'حریم خصوصی', 'پرسش‌ها'] }
+  ];
+  if (v === 0) {
+    return `<div class="pt-14 pb-8 px-[5%] bg-foreground text-mainbg">
+      <div class="max-w-[1200px] mx-auto">
+        <div class="grid md:grid-cols-4 gap-10 mb-10 pb-10 border-b border-mainbg/10">
+          <div>
+            <div class="flex items-center gap-2.5 mb-4">
+              <div class="w-9 h-9 bg-accent rounded-lg flex items-center justify-center text-foreground font-extrabold text-lg">${c.name[0]}</div>
+              <span class="font-bold text-base text-mainbg">${c.name}</span>
+            </div>
+            <p class="text-xs leading-7 opacity-70 max-w-[300px]">${c.about.slice(0, 80)}...</p>
+          </div>
+          ${cols.map(col => `
+            <div>
+              <h3 class="text-xs font-bold mb-3.5 text-accent">${col.title}</h3>
+              <div class="flex flex-col gap-2">
+                ${col.links.map(l => `<a class="text-xs opacity-70 hover:opacity-100 cursor-pointer">${l}</a>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="text-center text-xs opacity-60">© ۱۴۰۳ ${c.name}. تمامی حقوق محفوظ است.</div>
+      </div>
+    </div>`;
+  }
+  return `<div class="pt-12 pb-6 px-[5%] bg-mainbg border-t-4 border-primary">
+    <div class="max-w-[1200px] mx-auto">
+      <div class="grid md:grid-cols-3 gap-10 mb-8 pb-8 border-b border-foreground/5">
+        <div>
+          <div class="flex items-center gap-2.5 mb-3.5">
+            <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-extrabold text-base">${c.name[0]}</div>
+            <span class="font-bold text-sm text-foreground">${c.name}</span>
+          </div>
+          <p class="text-xs leading-7 text-muted max-w-[350px] mb-4">${c.about.slice(0, 100)}...</p>
+          <div class="flex items-center gap-2.5 p-2.5 bg-cardbg border border-foreground/5 rounded-lg w-fit">
+            ${ICONS.mail}<span class="text-xs text-muted" dir="ltr">${c.contact.email}</span>
+          </div>
+        </div>
+        ${cols.slice(0,2).map(col => `
+          <div>
+            <h3 class="text-xs font-bold text-foreground mb-3.5">${col.title}</h3>
+            <div class="flex flex-col gap-2.5">
+              ${col.links.map(l => `<a class="text-xs text-muted hover:text-foreground cursor-pointer">${l}</a>`).join('')}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="flex justify-between items-center">
+        <div class="text-xs text-muted">© ۱۴۰۳ ${c.name}</div>
+        <div class="flex gap-2">
+          ${['in', 'tw', 'ig'].map(s => `<div class="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center text-primary text-[10px] font-bold">${s}</div>`).join('')}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// =============== CORE ENGINE ===============
+function generateMockup(forceNew = false) {
+  if (!state.industry || state.sections.size === 0) return showToast('لطفاً صنعت و بخش‌ها را انتخاب کنید', 'error');
+  
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingOverlay').classList.add('flex');
+  
+  setTimeout(() => {
+    const palette = PALETTES[state.industry] || PALETTES.corporate;
+    const content = getContent(state.industry);
+    
+    if (forceNew) state.currentVariants = {};
+    
+    const mockupRoot = document.getElementById('mockupContent');
+    
+    // تزریق متغیرهای رنگ به Tailwind در عنصر ریشه
+    mockupRoot.style.setProperty('--c-primary', palette.primary);
+    mockupRoot.style.setProperty('--c-secondary', palette.secondary);
+    mockupRoot.style.setProperty('--c-accent', palette.accent);
+    mockupRoot.style.setProperty('--c-bg', palette.bg);
+    mockupRoot.style.setProperty('--c-fg', palette.fg);
+    mockupRoot.style.setProperty('--c-muted', palette.muted);
+    mockupRoot.style.setProperty('--c-cardBg', palette.cardBg);
+    
+    const html = [];
+    state.sections.forEach(id => {
+      const v = pickVariant(id, forceNew);
+      const fn = window['render' + id.charAt(0).toUpperCase() + id.slice(1)];
+      if (fn) html.push(fn(content, v));
+    });
+    
+    mockupRoot.innerHTML = html.join('');
+    document.getElementById('browserUrl').textContent = 'https://' + content.url;
+    
+    document.getElementById('regenerateBtn').disabled = false;
+    document.getElementById('downloadBtn').disabled = false;
+    document.getElementById('downloadHtmlBtn').disabled = false;
+    document.getElementById('toolbarTitle').textContent = `موکاپ ${content.name}`;
+    document.getElementById('toolbarMeta').innerHTML = `<span class="w-1.5 h-1.5 bg-[#7ee0a7] rounded-full animate-pulse"></span><span>${state.sections.size} بخش • ${content.tagline}</span>`;
+    
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    document.getElementById('loadingOverlay').classList.remove('flex');
+    showToast('موکاپ Tailwind با موفقیت ساخته شد!', 'success');
+  }, 400);
+}
+
+function downloadImage() {
+  document.getElementById('loadingOverlay').classList.remove('hidden');
+  document.getElementById('loadingOverlay').classList.add('flex');
+  html2canvas(document.getElementById('browserFrame'), { scale: 2, backgroundColor: null }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `mockup-tailwind-${Date.now()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    document.getElementById('loadingOverlay').classList.add('hidden');
+    document.getElementById('loadingOverlay').classList.remove('flex');
+    showToast('تصویر دانلود شد!', 'success');
+  });
+}
+
+function downloadHTML() {
+  const content = getContent(state.industry);
+  const palette = PALETTES[state.industry] || PALETTES.corporate;
+  const mockupHtml = document.getElementById('mockupContent').outerHTML;
+  
+  // در خروجی HTML، متغیرهای Tailwind به صورت استایل درون‌خطی روی همان دیو اصلی ست می‌شوند تا رنگ‌ها حفظ شوند
+  const styles = `--c-primary:${palette.primary};--c-secondary:${palette.secondary};--c-accent:${palette.accent};--c-bg:${palette.bg};--c-fg:${palette.fg};--c-muted:${palette.muted};--c-cardBg:${palette.cardBg};`;
+  const finalHtml = mockupHtml.replace('class="bg-white min-h-[600px] mockup-content"', `class="bg-white min-h-[600px] mockup-content" style="${styles}"`);
+  
+  const template = `<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>موکاپ ${content.name}</title>
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"><\/script>
+<script>tailwind.config={theme:{extend:{colors:{primary:'rgb(var(--c-primary)/<alpha-value>)',secondary:'rgb(var(--c-secondary)/<alpha-value>)',accent:'rgb(var(--c-accent)/<alpha-value>)',mainbg:'rgb(var(--c-bg)/<alpha-value>)',foreground:'rgb(var(--c-fg)/<alpha-value>)',muted:'rgb(var(--c-muted)/<alpha-value>)',cardbg:'rgb(var(--c-cardBg)/<alpha-value>)'}}}}}<\/script>
+</head>
+<body class="p-5 bg-gray-100 flex justify-center">
+  <div class="w-full max-w-[1200px] bg-white rounded-xl shadow-lg overflow-hidden">
+    ${finalHtml}
+  </div>
+</body>
+</html>`;
+  
+  const blob = new Blob([template], { type: 'text/html;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `tailwind-mockup-${content.name.replace(/\s/g,'-')}.html`;
+  a.click();
+  showToast('فایل HTML دانلود شد!', 'success');
+}
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span class="${type === 'success' ? 'text-[#7ee0a7]' : 'text-[#ff6b5b]'}">●</span> ${msg}`;
+  t.classList.remove('opacity-0', 'translate-y-32');
+  t.classList.add('opacity-100', 'translate-y-0');
+  setTimeout(() => { t.classList.add('opacity-0', 'translate-y-32'); t.classList.remove('opacity-100', 'translate-y-0'); }, 3000);
+}
+
+// =============== INIT ===============
+function init() {
+  renderSidebar();
+  document.getElementById('generateBtn').onclick = () => generateMockup(false);
+  document.getElementById('regenerateBtn').onclick = () => generateMockup(true);
+  document.getElementById('downloadBtn').onclick = downloadImage;
+  document.getElementById('downloadHtmlBtn').onclick = downloadHTML;
+  
+  document.querySelectorAll('.device-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.device-btn').forEach(b => b.classList.remove('active', 'bg-[#26221f]', 'text-white'));
+      document.querySelectorAll('.device-btn').forEach(b => b.classList.add('text-stone-400'));
+      btn.classList.add('active', 'bg-[#26221f]', 'text-white');
+      btn.classList.remove('text-stone-400');
+      const frame = document.getElementById('browserFrame');
+      if (btn.dataset.device === 'mobile') {
+        frame.style.maxWidth = '390px';
+        frame.classList.add('rounded-[32px]', 'p-2.5', 'bg-black', 'shadow-2xl');
+      } else {
+        frame.style.maxWidth = '1200px';
+        frame.classList.remove('rounded-[32px]', 'p-2.5', 'bg-black', 'shadow-2xl');
+      }
+    };
+  });
+}
+
+init();
+</script>
+</body>
+</html>

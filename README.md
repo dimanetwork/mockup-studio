@@ -91,3 +91,127 @@
 
 ```bash
 git clone https://github.com/dimanetwork/mockup-studio.git
+```
+
+### ۲. ورود به پوشه پروژه
+
+```bash
+cd mockup-studio
+```
+
+### ۳. اجرای پروژه
+
+فایل `index.html` را در مرورگر خود (ترجیحاً **Chrome** یا **Firefox**) باز کنید. تمام! 🎉
+
+> 💡 **نکته حرفه‌ای:** می‌توانید فایل‌ها را روی **GitHub Pages**، **Vercel**، **Netlify** یا هاست خود آپلود کنید تا به صورت آنلاین در دسترس باشد.
+
+---
+
+## 🛠 تکنولوژی‌های استفاده شده (Tech Stack)
+
+<div align="center">
+
+| تکنولوژی | کاربرد |
+| :--- | :--- |
+| ![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white) | ساختار پروژه |
+| ![JavaScript](https://img.shields.io/badge/Vanilla_JS-F7DF1E?style=flat-square&logo=javascript&logoColor=black) | منطق برنامه (بدون فریم‌ورک سنگین) |
+| ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white) | استایل‌دهی با پشتیبانی از CSS Variables |
+| ![html2canvas](https://img.shields.io/badge/html2canvas-FF6B6B?style=flat-square) | تولید خروجی تصویری |
+| ![Vazirmatn](https://img.shields.io/badge/Vazirmatn_Font-8B5CF6?style=flat-square) | تایپوگرافی فارسی استاندارد |
+
+</div>
+
+---
+
+## 🤝 راهنمای مشارکت (Contributing)
+
+ما از مشارکت شما استقبال می‌کنیم! اگر ایده برای سکشن‌های جدید دارید، یا می‌خواهید یک صنعت جدید اضافه کنید، مراحل زیر را دنبال کنید:
+
+```bash
+# ۱. ریپازیتوری را Fork کنید
+# ۲. یک شاخه جدید بسازید
+git checkout -b feature/new-industry
+
+# ۳. تغییرات خود را Commit کنید
+git commit -m 'Add new industry: Real Estate'
+
+# ۴. تغییرات را Push کنید
+git push origin feature/new-industry
+
+# ۵. یک Pull Request برای ما ارسال کنید ✨
+```
+
+<details>
+<summary><b>📌 انواع مشارکت‌های مورد نیاز</b></summary>
+<br>
+
+- 🎨 طراحی سکشن‌های جدید (Portfolio, Blog, Contact)
+- 🌍 اضافه کردن صنایع جدید (املاک، پزشکی، آموزشی و...)
+- 🌐 اضافه کردن زبان‌های جدید (English, Arabic, ...)
+- 🐛 گزارش و رفع باگ‌ها
+- 📚 بهبود مستندات
+
+</details>
+
+---
+
+## 📊 ساختار پروژه
+
+```
+mockup-studio/
+│
+├── 📄 index.html          # فایل اصلی پروژه
+├── 📄 docs.html           # مستندات کامل
+├── 🎨 assets/
+│   ├── css/               # فایل‌های استایل سفارشی
+│   ├── js/                # ماژول‌های جاوااسکریپت
+│   └── images/            # تصاویر و آیکون‌ها
+├── 📖 README.md           # این فایل
+└── ⚖️ LICENSE             # لایسنس MIT
+```
+
+---
+
+## 📄 لایسنس (License)
+
+این پروژه تحت لایسنس **MIT** منتشر شده است. استفاده تجاری و شخصی از آن کاملاً آزاد است.
+
+<p align="center">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square" alt="MIT License">
+  </a>
+</p>
+
+---
+
+## 🔗 لینک‌های مفید
+
+<div align="center">
+
+| 🌐 دمو آنلاین | 📖 مستندات | 💬 پشتیبانی |
+| :---: | :---: | :---: |
+| [mockupstudio.ir](https://mockupstudio.ir) | [mockupstudio.ir/docs.html](https://mockupstudio.ir/docs.html) | [ایجاد Issue](https://github.com/dimanetwork/mockup-studio/issues) |
+
+</div>
+
+---
+
+<div align="center">
+
+### 🌟 اگر این پروژه برایتان مفید بود، ستاره دادن را فراموش نکنید! 🌟
+
+**ساخته شده با ❤️ توسط دیما**
+
+<p>
+  <a href="https://github.com/dimanetwork/mockup-studio">
+    <img src="https://img.shields.io/github/stars/dimanetwork/mockup-studio?style=social" alt="GitHub Stars">
+  </a>
+  <a href="https://github.com/dimanetwork/mockup-studio">
+    <img src="https://img.shields.io/github/forks/dimanetwork/mockup-studio?style=social" alt="GitHub Forks">
+  </a>
+  <a href="https://github.com/dimanetwork/mockup-studio/issues">
+    <img src="https://img.shields.io/github/issues/dimanetwork/mockup-studio?style=social" alt="GitHub Issues">
+  </a>
+</p>
+
+</div>
